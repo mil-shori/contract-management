@@ -1,0 +1,53 @@
+project/
+├── backend/
+│   ├── api/
+│   │   ├── controllers/
+│   │   │   └── contractController.js
+│   │   ├── models/
+│   │   │   └── contractModel.js
+│   │   ├── routes/
+│   │   │   └── contractRoutes.js
+│   │   └── app.js
+│   ├── services/
+│   │   ├── aiService.py
+│   │   ├── ocrService.py
+│   │   └── searchService.js
+│   ├── config/
+│   │   ├── dbConfig.js
+│   │   └── authConfig.js
+│   ├── package.json
+│   └── server.js
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ContractForm.jsx
+│   │   │   ├── ContractList.jsx
+│   │   │   └── Header.jsx
+│   │   ├── pages/
+│   │   │   ├── HomePage.jsx
+│   │   │   └── ContractPage.jsx
+│   │   ├── App.jsx
+│   │   ├── index.js
+│   │   └── i18n.js
+│   ├── public/
+│   │   ├── index.html
+│   │   └── favicon.ico
+│   ├── package.json
+│   └── webpack.config.js
+├── infra/
+│   ├── docker/
+│   │   ├── Dockerfile.backend
+│   │   ├── Dockerfile.frontend
+│   │   └── docker-compose.yml
+│   ├── k8s/
+│   │   ├── deployment.yaml
+│   │   ├── service.yaml
+│   │   └── ingress.yaml
+│   └── ci-cd/
+│       ├── github-actions.yml
+│       └── argo-cd-config.yaml
+├── docs/
+│   ├── requirements.md
+│   ├── architecture.md
+│   └── api-spec.yaml
+└── README.md

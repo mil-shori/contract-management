@@ -1,0 +1,37 @@
+# Google Cloud Platform
+google-cloud-vision==3.4.4
+google-cloud-firestore==2.13.1
+google-cloud-storage==2.10.0
+google-cloud-functions-framework==3.5.0
+
+# PDF処理
+PyPDF2==3.0.1
+pdf2image==1.16.3
+pdfplumber==0.10.3
+
+# 画像処理
+Pillow==10.1.0
+opencv-python==4.8.1.78
+
+# データ処理
+pandas==2.1.4
+numpy==1.25.2
+
+# 日本語処理
+janome==0.5.0
+regex==2023.10.3
+
+# ユーティリティ
+python-dateutil==2.8.2
+python-dotenv==1.0.0
+requests==2.31.0
+
+# Firebase
+firebase-admin==6.4.0
+
+# FastAPI (オプション)
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# 型ヒント
+typing-extensions==4.8.0

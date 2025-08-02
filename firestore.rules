@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ユーザー認証関数
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // リソース所有者確認関数
+    function isOwner(resource) {
+      return request.auth.uid == resource.data.userId;
+    }
+    
+    // 管理者権限確認関数
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+    
+    // 読み書き権限確認関数
+    function hasAccess(resource) {
+      return isOwner(resource) || isAdmin() || 
+             (resource.data.collaborators != null && 
+              request.auth.uid in resource.data.collaborators);
+    }
+    
+    // 契約データのアクセス制御
+    match /contracts/{contractId} {
+      // 読み取り: 所有者・管理者・共同編集者のみ
+      allow read: if isAuthenticated() && 
+                     (isOwner(resource) || isAdmin() || 
+                      (resource.data.collaborators != null && 
+                       request.auth.uid in resource.data.collaborators));
+      
+      // 作成: 認証済みユーザーで、userIdが自分のUID
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == request.resource.data.userId &&
+                       isValidContract(request.resource.data);
+      
+      // 更新: 所有者・管理者・共同編集者のみ
+      allow update: if isAuthenticated() && 
+                       hasAccess(resource) &&
+                       isValidContract(request.resource.data) &&
+                       request.resource.data.userId == resource.data.userId;
+      
+      // 削除: 所有者・管理者のみ
+      allow delete: if isAuthenticated() && 
+                       (isOwner(resource) || isAdmin());
+    }
+    
+    // 契約データのサブコレクション（履歴・コメント等）
+    match /contracts/{contractId}/history/{historyId} {
+      allow read, write: if isAuthenticated() && 
+                            exists(/databases/$(database)/documents/contracts/$(contractId)) &&
+                            hasAccess(get(/databases/$(database)/documents/contracts/$(contractId)));
+    }
+    
+    match /contracts/{contractId}/comments/{commentId} {
+      allow read: if isAuthenticated() && 
+                     exists(/databases/$(database)/documents/contracts/$(contractId)) &&
+                     hasAccess(get(/databases/$(database)/documents/contracts/$(contractId)));
+      
+      allow create: if isAuthenticated() && 
+                       exists(/databases/$(database)/documents/contracts/$(contractId)) &&
+                       hasAccess(get(/databases/$(database)/documents/contracts/$(contractId))) &&
+                       request.auth.uid == request.resource.data.userId;
+      
+      allow update, delete: if isAuthenticated() && 
+                               request.auth.uid == resource.data.userId;
+    }
+    
+    // ユーザープロファイル
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && 
+                            (request.auth.uid == userId || isAdmin());
+    }
+    
+    // 組織・チーム管理
+    match /organizations/{orgId} {
+      allow read: if isAuthenticated() && 
+                     (request.auth.uid in resource.data.members || isAdmin());
+      
+      allow write: if isAuthenticated() && 
+                      (request.auth.uid in resource.data.admins || isAdmin());
+    }
+    
+    // 取引先管理
+    match /partners/{partnerId} {
+      allow read, write: if isAuthenticated() && 
+                            (resource.data.organizationId in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizations ||
+                             isAdmin());
+    }
+    
+    // システム設定（管理者のみ）
+    match /system/{setting} {
+      allow read, write: if isAuthenticated() && isAdmin();
+    }
+    
+    // 契約データバリデーション関数
+    function isValidContract(data) {
+      return data.keys().hasAll(['title', 'status', 'userId', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.status in ['draft', 'review', 'approved', 'signed', 'expired', 'terminated'] &&
+             data.userId is string &&
+             data.createdAt is timestamp &&
+             (data.keys().hasAny(['updatedAt']) ? data.updatedAt is timestamp : true) &&
+             (data.keys().hasAny(['partnerId']) ? data.partnerId is string : true) &&
+             (data.keys().hasAny(['amount']) ? data.amount is number && data.amount >= 0 : true) &&
+             (data.keys().hasAny(['startDate']) ? data.startDate is timestamp : true) &&
+             (data.keys().hasAny(['endDate']) ? data.endDate is timestamp : true) &&
+             (data.keys().hasAny(['collaborators']) ? data.collaborators is list : true);
+    }
+  }
+}

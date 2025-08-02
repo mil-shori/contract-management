@@ -1,0 +1,129 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ユーザー認証確認
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // ファイルサイズ制限（10MB）
+    function isValidFileSize() {
+      return request.resource.size <= 10 * 1024 * 1024;
+    }
+    
+    // 許可されたファイル形式
+    function isValidFileType() {
+      return request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/msword') ||
+             request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+             request.resource.contentType.matches('text/plain');
+    }
+    
+    // ユーザー専用ディレクトリの契約ファイル
+    match /contracts/{userId}/{contractId}/{fileName} {
+      // 読み取り: 自分のファイルのみ、または管理者
+      allow read: if isAuthenticated() && 
+                     (request.auth.uid == userId || 
+                      request.auth.token.admin == true);
+      
+      // 作成・更新: 自分のディレクトリのみ、ファイル形式・サイズチェック
+      allow write: if isAuthenticated() && 
+                      request.auth.uid == userId &&
+                      isValidFileType() &&
+                      isValidFileSize();
+      
+      // 削除: 自分のファイルのみ、または管理者
+      allow delete: if isAuthenticated() && 
+                       (request.auth.uid == userId || 
+                        request.auth.token.admin == true);
+    }
+    
+    // 共有契約ファイル（複数ユーザーがアクセス可能）
+    match /shared-contracts/{contractId}/{fileName} {
+      // 読み取り: Firestoreの契約データでアクセス権限を確認
+      allow read: if isAuthenticated() && 
+                     isAuthorizedForContract(contractId);
+      
+      // 作成・更新: Firestoreの契約データでアクセス権限を確認
+      allow write: if isAuthenticated() && 
+                      isAuthorizedForContract(contractId) &&
+                      isValidFileType() &&
+                      isValidFileSize();
+      
+      // 削除: 管理者またはcontract所有者のみ
+      allow delete: if isAuthenticated() && 
+                       (request.auth.token.admin == true ||
+                        isContractOwner(contractId));
+    }
+    
+    // 一時アップロードディレクトリ（OCR処理用など）
+    match /temp/{userId}/{fileName} {
+      // 1時間以内の一時ファイルのみ許可
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid == userId &&
+                            isValidFileType() &&
+                            isValidFileSize();
+      
+      // 一時ファイルは自動削除されるが、手動削除も許可
+      allow delete: if isAuthenticated() && 
+                       request.auth.uid == userId;
+    }
+    
+    // ユーザープロファイル画像
+    match /profiles/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      
+      allow write: if isAuthenticated() && 
+                      request.auth.uid == userId &&
+                      request.resource.contentType.matches('image/.*') &&
+                      request.resource.size <= 2 * 1024 * 1024; // 2MB制限
+      
+      allow delete: if isAuthenticated() && 
+                       request.auth.uid == userId;
+    }
+    
+    // 組織・チーム共有ファイル
+    match /organizations/{orgId}/{fileName} {
+      allow read, write: if isAuthenticated() && 
+                            isOrgMember(orgId) &&
+                            isValidFileType() &&
+                            isValidFileSize();
+      
+      allow delete: if isAuthenticated() && 
+                       (isOrgAdmin(orgId) || 
+                        request.auth.token.admin == true);
+    }
+    
+    // システム関連ファイル（管理者のみ）
+    match /system/{fileName} {
+      allow read, write, delete: if isAuthenticated() && 
+                                    request.auth.token.admin == true;
+    }
+    
+    // 契約へのアクセス権限確認関数（Firestoreと連携）
+    // 注意: Storageルールから直接Firestoreにアクセスはできないため、
+    // 実際の実装ではカスタムクレームやファイル名規則で権限管理を行う
+    function isAuthorizedForContract(contractId) {
+      // 実装時はFirebase Functionsでカスタムクレームを設定
+      return request.auth.token.contracts != null && 
+             contractId in request.auth.token.contracts;
+    }
+    
+    function isContractOwner(contractId) {
+      return request.auth.token.contractOwner != null && 
+             contractId in request.auth.token.contractOwner;
+    }
+    
+    function isOrgMember(orgId) {
+      return request.auth.token.organizations != null && 
+             orgId in request.auth.token.organizations;
+    }
+    
+    function isOrgAdmin(orgId) {
+      return request.auth.token.orgAdmins != null && 
+             orgId in request.auth.token.orgAdmins;
+    }
+  }
+}
