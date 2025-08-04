@@ -160,6 +160,100 @@ contract-management-system/
 
 ## 開発フロー
 
+### 🚀 開発ワークフロー（必須ルール）
+
+**すべてのコード修正は以下のワークフローに従ってください：**
+
+#### 🛠️ 自動化スクリプトの使用（推奨）
+
+```bash
+# 1. 新しいブランチの作成
+./scripts/new-branch.sh <type> <name>
+# 例: ./scripts/new-branch.sh feature user-authentication
+
+# 2. 開発作業後、コミット・プッシュ
+./scripts/commit-push.sh "<commit-message>"
+# 例: ./scripts/commit-push.sh "feat: ユーザー認証機能を追加"
+
+# 3. マージ後のブランチクリーンアップ
+./scripts/cleanup-branch.sh
+```
+
+#### 📋 手動での開発ワークフロー
+
+#### 1. 新しいブランチの作成
+```bash
+# メインブランチから最新の状態を取得
+git checkout main
+git pull origin main
+
+# 機能ブランチを作成（命名規則: feature/機能名、fix/修正内容、refactor/改善内容）
+git checkout -b feature/your-feature-name
+# または
+git checkout -b fix/bug-description
+# または
+git checkout -b refactor/improvement-description
+```
+
+#### 2. 開発作業
+```bash
+# コードの修正・追加
+# テストの実行
+npm run test
+
+# コードフォーマット・リンターの実行
+npm run lint
+npm run format
+```
+
+#### 3. コミットとプッシュ
+```bash
+# 変更をステージング
+git add .
+
+# コミット（コミットメッセージは明確に）
+git commit -m "feat: 新機能の説明"
+# または
+git commit -m "fix: バグ修正の説明"
+# または
+git commit -m "refactor: リファクタリングの説明"
+
+# リモートリポジトリにプッシュ
+git push origin feature/your-feature-name
+```
+
+#### 4. プルリクエスト作成
+- GitHub上で手動でプルリクエストを作成
+- レビュー後にmainブランチにマージ
+- マージ後は機能ブランチを削除
+
+#### 5. ブランチのクリーンアップ
+```bash
+# mainブランチに戻る
+git checkout main
+
+# 最新の状態を取得
+git pull origin main
+
+# 不要になった機能ブランチを削除
+git branch -d feature/your-feature-name
+```
+
+### 📜 利用可能なスクリプト
+
+| スクリプト | 用途 | 使用例 |
+|-----------|------|--------|
+| `new-branch.sh` | 新しいブランチの作成 | `./scripts/new-branch.sh feature user-auth` |
+| `commit-push.sh` | テスト・リント実行後のコミット・プッシュ | `./scripts/commit-push.sh "feat: 新機能追加"` |
+| `cleanup-branch.sh` | マージ後のブランチクリーンアップ | `./scripts/cleanup-branch.sh` |
+
+### ⚠️ 重要な注意事項
+- **mainブランチへの直接コミットは禁止**
+- すべての変更は機能ブランチ経由で行う
+- コミット前には必ずテストとリンターを実行
+- プルリクエストでのコードレビューを経てからマージ
+- コミットメッセージは [Conventional Commits](https://www.conventionalcommits.org/) 形式を推奨
+
 ### ローカル開発
 ```bash
 # Firebase Emulator Suite 起動
