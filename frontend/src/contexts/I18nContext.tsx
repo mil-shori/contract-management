@@ -75,7 +75,7 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
       document.documentElement.lang = languageCode;
       
       // Material UI の方向性を更新（将来的にRTL言語対応する場合）
-      document.dir = languageCode === 'ar' ? 'rtl' : 'ltr';
+      document.dir = 'ltr'; // Currently only LTR languages supported
       
     } catch (error) {
       console.error('Failed to change language:', error);

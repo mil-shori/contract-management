@@ -5,6 +5,7 @@ import { Box } from '@mui/material';
 import { useAuth } from './hooks/useAuth';
 import Layout from './components/Layout';
 import LoadingScreen from './components/LoadingScreen';
+import I18nDemo from './pages/I18nDemo';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ContractsPage from './pages/ContractsPage';
@@ -46,7 +47,10 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const App: React.FC = () => {
   return (
     <Routes>
-      {/* パブリックルート */}
+      {/* Demo route for testing i18n - accessible without auth */}
+      <Route path="/demo" element={<I18nDemo />} />
+
+      {/* Paｓublic route */}
       <Route
         path="/login"
         element={
@@ -107,7 +111,7 @@ const App: React.FC = () => {
       />
 
       {/* デフォルトルート */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/demo" replace />} />
       
       {/* 404 ページ */}
       <Route path="*" element={<NotFoundPage />} />
