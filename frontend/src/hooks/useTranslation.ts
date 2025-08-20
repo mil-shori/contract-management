@@ -6,63 +6,63 @@ export const useTranslation = () => {
   const { t, i18n } = useReactI18nextTranslation();
   const i18nContext = useI18n();
   
-  // 翻訳のショートカット関数
-  const translate = (key: string, options?: any) => {
-    return t(key, options);
+  // 翻訳のショートカット関数（型安全）
+  const translate = (key: string, options?: any): string => {
+    return t(key, options) as string;
   };
 
   // 契約ステータスの翻訳
-  const translateContractStatus = (status: string) => {
-    return t(`contractStatus.${status}`, { defaultValue: status });
+  const translateContractStatus = (status: string): string => {
+    return t(`contractStatus.${status}`, { defaultValue: status }) as string;
   };
 
   // 優先度の翻訳
-  const translatePriority = (priority: string) => {
-    return t(`priority.${priority}`, { defaultValue: priority });
+  const translatePriority = (priority: string): string => {
+    return t(`priority.${priority}`, { defaultValue: priority }) as string;
   };
 
   // 機密レベルの翻訳
-  const translateConfidentiality = (level: string) => {
-    return t(`confidentiality.${level}`, { defaultValue: level });
+  const translateConfidentiality = (level: string): string => {
+    return t(`confidentiality.${level}`, { defaultValue: level }) as string;
   };
 
   // リスクレベルの翻訳
-  const translateRiskLevel = (level: string) => {
-    return t(`riskLevel.${level}`, { defaultValue: level });
+  const translateRiskLevel = (level: string): string => {
+    return t(`riskLevel.${level}`, { defaultValue: level }) as string;
   };
 
   // エラーメッセージの翻訳
-  const translateError = (errorKey: string, fallback?: string) => {
-    return t(`errors.${errorKey}`, { defaultValue: fallback || t('errors.unexpectedError') });
+  const translateError = (errorKey: string, fallback?: string): string => {
+    return t(`errors.${errorKey}`, { defaultValue: fallback || t('errors.unexpectedError') }) as string;
   };
 
   // バリデーションエラーの翻訳
-  const translateValidation = (field: string, rule: string, options?: any) => {
-    return t(`contractForm.validation.${field}${rule}`, options);
+  const translateValidation = (field: string, rule: string, options?: any): string => {
+    return t(`contractForm.validation.${field}${rule}`, options) as string;
   };
 
   // 複数形の翻訳（カウントに基づいて）
-  const translatePlural = (key: string, count: number, options?: any) => {
-    return t(key, { count, ...options });
+  const translatePlural = (key: string, count: number, options?: any): string => {
+    return t(key, { count, ...options }) as string;
   };
 
   // 相対時間の翻訳（例：「2時間前」）
-  const translateRelativeTime = (date: Date | string) => {
+  const translateRelativeTime = (date: Date | string): string => {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
     
     if (diffInSeconds < 60) {
-      return t('common.justNow', { defaultValue: 'Just now' });
+      return t('common.justNow', { defaultValue: 'Just now' }) as string;
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return t('common.minutesAgo', { count: minutes, defaultValue: `${minutes} minutes ago` });
+      return t('common.minutesAgo', { count: minutes, defaultValue: `${minutes} minutes ago` }) as string;
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return t('common.hoursAgo', { count: hours, defaultValue: `${hours} hours ago` });
+      return t('common.hoursAgo', { count: hours, defaultValue: `${hours} hours ago` }) as string;
     } else {
       const days = Math.floor(diffInSeconds / 86400);
-      return t('common.daysAgo', { count: days, defaultValue: `${days} days ago` });
+      return t('common.daysAgo', { count: days, defaultValue: `${days} days ago` }) as string;
     }
   };
 

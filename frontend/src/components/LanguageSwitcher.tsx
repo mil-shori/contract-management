@@ -47,15 +47,13 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const handleLanguageChange = async (languageCode: SupportedLanguage) => {
     try {
       await changeLanguage(languageCode);
-      toast.success(t('settings.languageChanged'));
+      toast.success(t('settings.languageChanged') as string);
       handleClose();
     } catch (error) {
       console.error('Failed to change language:', error);
-      toast.error(t('common.error'));
+      toast.error(t('common.error') as string);
     }
   };
-
-  const currentLanguageData = languages.find(lang => lang.code === currentLanguage);
 
   if (variant === 'menu') {
     return (
@@ -87,12 +85,12 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   return (
     <>
-      <Tooltip title={t('settings.changeLanguage')}>
+      <Tooltip title={t('settings.changeLanguage') as string}>
         <IconButton
           onClick={handleClick}
           disabled={isChangingLanguage}
           color="inherit"
-          aria-label={t('settings.changeLanguage')}
+          aria-label={t('settings.changeLanguage') as string}
           aria-controls={open ? 'language-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}

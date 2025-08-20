@@ -25,8 +25,6 @@ import {
   CloudUpload as UploadIcon,
   Delete as DeleteIcon,
   Download as DownloadIcon,
-  Visibility as PreviewIcon,
-  InsertDriveFile as FileIcon,
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +50,7 @@ interface FileMetadata {
 interface FileUploadProps {
   contractId?: string;
   onFileUploaded?: (file: FileMetadata) => void;
+  onFileUpload?: (files: File[]) => void;
   maxFiles?: number;
   allowedTypes?: string[];
 }
@@ -59,6 +58,7 @@ interface FileUploadProps {
 const FileUpload: React.FC<FileUploadProps> = ({
   contractId,
   onFileUploaded,
+  onFileUpload,
   maxFiles = 10,
   allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'text/plain'],
 }) => {
@@ -133,6 +133,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
       setSelectedFiles(validFiles);
       setUploadDialog(true);
       setError(null);
+      
+      // If onFileUpload callback is provided (for simple file handling)
+      if (onFileUpload) {
+        onFileUpload(validFiles);
+      }
     }
   }, [allowedTypes, t]);
 
