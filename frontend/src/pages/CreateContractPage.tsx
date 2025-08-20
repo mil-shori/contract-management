@@ -21,7 +21,6 @@ import {
 import {
   Save as SaveIcon,
   Cancel as CancelIcon,
-  CloudUpload as UploadIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -53,11 +52,17 @@ const contractSchema = yup.object({
     .string()
     .required('Currency is required'),
   startDate: yup
-    .date()
+    .string()
     .required('Start date is required'),
   endDate: yup
-    .date()
-    .min(yup.ref('startDate'), 'End date must be after start date'),
+    .string()
+    .when('startDate', (startDate, schema) => {
+      return startDate ? schema.test(
+        'is-after-start',
+        'End date must be after start date',
+        (endDate) => !endDate || endDate > startDate
+      ) : schema;
+    }),
   category: yup
     .string()
     .required('Category is required'),
@@ -71,13 +76,13 @@ const contractSchema = yup.object({
 
 interface ContractFormData {
   title: string;
-  description: string;
+  description?: string;
   partnerName: string;
-  partnerEmail: string;
+  partnerEmail?: string;
   amount: number;
   currency: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   category: string;
   priority: string;
   confidentiality: string;
@@ -114,7 +119,6 @@ const CreateContractPage: React.FC = () => {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch
   } = useForm<ContractFormData>({
     resolver: yupResolver(contractSchema),
     defaultValues: {

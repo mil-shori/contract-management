@@ -40,9 +40,6 @@ i18n
       
       // LocalStorageのキー
       lookupLocalStorage: 'i18nextLng',
-      
-      // 候補言語のチェック
-      checkWhitelist: true,
     },
     
     // サポート言語のホワイトリスト
