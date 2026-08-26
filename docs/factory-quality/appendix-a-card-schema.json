@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/factory-quality/card.schema.json",
+  "title": "観点カード (Knowledge Card)",
+  "description": "食品工場の品質担保ナレッジの最小単位。動画・音声の発言から起案され、承認を経て確定する。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "title", "target", "observe", "criteria", "source", "confidence"],
+  "properties": {
+    "id":   { "type": "string", "description": "card_ プレフィックスのID" },
+    "type": {
+      "type": "string",
+      "enum": ["inspection_point", "procedure_step", "maintenance_point", "judgment_rule"],
+      "description": "inspection_point=巡回時の観点 / procedure_step=作業手順 / maintenance_point=設備点検 / judgment_rule=判断の原則"
+    },
+    "title": { "type": "string", "maxLength": 60, "description": "一文で。現場が読んで即分かる長さ" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "line":      { "type": ["string", "null"] },
+        "equipment": { "type": ["string", "null"] },
+        "process":   { "type": ["string", "null"] }
+      }
+    },
+    "observe":  { "type": "string", "description": "何を見るか・何を確認するか" },
+    "senses": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["見る", "聞く", "触る", "嗅ぐ", "測る"] },
+      "description": "五感タグ。設備点検で特に重要"
+    },
+    "criteria": {
+      "type": "string",
+      "description": "OK/NGの境界。数値または見た目で書く。『しっかり』『適切に』は不可"
+    },
+    "why": {
+      "type": ["string", "null"],
+      "description": "なぜそうするか・過去に何が起きたか。発言から読み取れない場合は null にし、confidence を下げること。推測で埋めてはならない"
+    },
+    "onNg":      { "type": ["string", "null"], "description": "NGのときの処置と、誰に報告するか" },
+    "frequency": { "type": ["string", "null"], "description": "タイミング・頻度" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["captureId", "startSec", "endSec", "quote"],
+      "description": "出典。これが埋められないカードは出力してはならない",
+      "properties": {
+        "captureId": { "type": "string" },
+        "startSec":  { "type": "number", "minimum": 0 },
+        "endSec":    { "type": "number", "minimum": 0 },
+        "quote":     { "type": "string", "description": "発言の原文そのまま。要約しない" },
+        "speaker":   { "type": ["string", "null"] }
+      }
+    },
+    "translations": {
+      "type": "object",
+      "description": "言語コードをキーにした翻訳。原文は必ず併記して表示する",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "title":    { "type": "string" },
+          "observe":  { "type": "string" },
+          "criteria": { "type": "string" },
+          "why":      { "type": ["string", "null"] },
+          "onNg":     { "type": ["string", "null"] }
+        }
+      }
+    },
+    "confidence": {
+      "type": "number", "minimum": 0, "maximum": 1,
+      "description": "起案の確からしさ。音声不明瞭・why が埋まらない・判断基準が曖昧な場合は下げる"
+    },
+    "status":  { "type": "string", "enum": ["draft", "approved", "archived"], "default": "draft" },
+    "version": { "type": "integer", "minimum": 1, "default": 1 },
+    "approvedBy": { "type": ["string", "null"] },
+    "approvedAt": { "type": ["string", "null"], "format": "date-time" },
+    "embedding": {
+      "type": "array", "items": { "type": "number" },
+      "description": "Vertex AI text-multilingual-embedding-002 の出力（768次元）。approved 時に生成"
+    },
+    "embeddingUpdatedAt": { "type": ["string", "null"], "format": "date-time" }
+  }
+}
